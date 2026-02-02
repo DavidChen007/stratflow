@@ -28,7 +28,8 @@ const App: React.FC = () => {
   const [state, setState] = useState<AppState>({
     processes: [],
     departments: [],
-    strategy: { mission: '', vision: '', companyOKRs: {} },
+    // Fix: Added missing properties customerIssues and employeeIssues to match CompanyStrategy interface
+    strategy: { mission: '', vision: '', customerIssues: '', employeeIssues: '', companyOKRs: {} },
     users: [],
     weeklyPADs: []
   });

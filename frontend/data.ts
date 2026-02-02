@@ -72,7 +72,8 @@ export const getWorkspace = async (entId: string): Promise<AppState> => {
     users: users || [],
     processes: processes || [],
     departments: buildDeptTree(flatDepts || []),
-    strategy: strategy || { mission: '', vision: '', companyOKRs: {} },
+    // Fix: Added missing properties customerIssues and employeeIssues to match CompanyStrategy interface
+    strategy: strategy || { mission: '', vision: '', customerIssues: '', employeeIssues: '', companyOKRs: {} },
     weeklyPADs: pads || []
   };
 };
