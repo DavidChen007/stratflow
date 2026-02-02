@@ -7,9 +7,10 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit() {
     this.pool = mysql.createPool({
-      host: process.env.DB_HOST || 'localhost',
+      host: process.env.DB_HOST || '192.168.0.80',
+      port: parseInt(process.env.DB_PORT) || 3306,
       user: process.env.DB_USER || 'root',
-      password: process.env.DB_PASSWORD || 'root',
+      password: process.env.DB_PASSWORD || 'feixun@123ERP',
       database: process.env.DB_NAME || 'stratflow',
       waitForConnections: true,
       connectionLimit: 10,
