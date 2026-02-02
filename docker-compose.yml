@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # 1. 数据库服务
+  # 1. Database
   db:
     image: mysql:8.0
     container_name: stratflow-db
@@ -17,7 +17,7 @@ services:
     networks:
       - stratflow-net
 
-  # 2. NestJS 后端服务
+  # 2. NestJS Backend
   backend:
     build:
       context: ./backend
@@ -35,7 +35,7 @@ services:
     networks:
       - stratflow-net
 
-  # 3. 前端服务 (入口)
+  # 3. Frontend Entry
   frontend:
     build:
       context: ./frontend

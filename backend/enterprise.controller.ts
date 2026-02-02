@@ -1,3 +1,4 @@
+
 import { Controller, Get, Post, Body, HttpException, HttpStatus } from '@nestjs/common';
 import { DatabaseService } from './database.service';
 
@@ -20,18 +21,18 @@ export class EnterpriseController {
       // 1. 创建企业
       await this.db.query("INSERT INTO enterprises (name, display_name, password) VALUES (?, ?, ?)", [name, displayName, password || 'root']);
       
-      // 2. 自动初始化管理员
+      // 2. 自动初始化管理员 (默认密码 888888)
       await this.db.query(
         "INSERT INTO users (id, ent_name, username, password, name, role) VALUES (?, ?, ?, ?, ?, ?)",
         [`admin-${Date.now()}`, name, 'admin', '888888', '系统管理员', 'Admin']
       );
 
       // 3. 初始化战略记录
-      await this.db.query("INSERT INTO strategies (ent_name, mission, vision) VALUES (?, '', '')", [name]);
+      await this.db.query("INSERT INTO strategies (ent_name, mission, vision, okrs_json) VALUES (?, '', '', '{}')", [name]);
 
-      return { message: "Enterprise and Admin created" };
+      return { success: true, message: "Enterprise and Admin created" };
     } catch (err: any) {
-      if (err.code === 'ER_DUP_ENTRY') throw new HttpException('Exists', HttpStatus.CONFLICT);
+      if (err.code === 'ER_DUP_ENTRY') throw new HttpException('Enterprise ID already exists', HttpStatus.CONFLICT);
       throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

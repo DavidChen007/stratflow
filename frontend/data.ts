@@ -8,8 +8,8 @@ const api = async <T>(endpoint: string, options?: RequestInit): Promise<T> => {
     ...options,
   });
   if (!response.ok) {
-    const err = await response.json();
-    throw new Error(err.error || 'API Request Failed');
+    const err = await response.json().catch(() => ({ error: 'API Request Failed' }));
+    throw new Error(err.error || 'Request Error');
   }
   const text = await response.text();
   return text ? JSON.parse(text) : {} as T;
@@ -29,19 +29,20 @@ export const getEnterprises = () => api<Enterprise[]>('/enterprises');
 
 // --- Granular Workspace Data ---
 export const getWorkspace = async (entId: string): Promise<AppState> => {
-  // 这里是一个聚合请求，实际生产中可以分多次加载
-  const users = await api<User[]>(`/users?entId=${entId}`);
-  const processes = await api<ProcessDefinition[]>(`/workspace/processes/${entId}`);
-  const departments = await api<Department[]>(`/workspace/departments/${entId}`);
-  const strategy = await api<any>(`/workspace/strategy/${entId}`);
-  const weeklyPADs = await api<WeeklyPAD[]>(`/workspace/pads/${entId}`);
+  const [users, processes, departments, strategy, pads] = await Promise.all([
+    api<User[]>(`/users?entId=${entId}`),
+    api<ProcessDefinition[]>(`/workspace/processes/${entId}`),
+    api<Department[]>(`/workspace/departments/${entId}`),
+    api<any>(`/workspace/strategy/${entId}`),
+    api<WeeklyPAD[]>(`/workspace/pads/${entId}`).catch(() => [])
+  ]);
 
   return {
-    users,
+    users: users || [],
     processes: processes || [],
     departments: departments || [],
     strategy: strategy || { mission: '', vision: '', companyOKRs: {} },
-    weeklyPADs: weeklyPADs || []
+    weeklyPADs: pads || []
   };
 };
 
@@ -49,8 +50,6 @@ export const saveUser = (entId: string, user: User) => api('/users', { method: '
 export const deleteUser = (id: string) => api(`/users/${id}`, { method: 'DELETE' });
 
 export const saveProcess = (entId: string, proc: ProcessDefinition) => api(`/workspace/processes/${entId}`, { method: 'POST', body: JSON.stringify(proc) });
-export const deleteProcess = (id: string) => api(`/workspace/processes/${id}`, { method: 'DELETE' });
-
 export const saveStrategy = (entId: string, strat: any) => api(`/workspace/strategy/${entId}`, { method: 'POST', body: JSON.stringify(strat) });
 export const saveDepartments = (entId: string, depts: Department[]) => api(`/workspace/departments/${entId}`, { method: 'POST', body: JSON.stringify(depts) });
 export const savePADs = (entId: string, pads: WeeklyPAD[]) => api(`/workspace/pads/${entId}`, { method: 'POST', body: JSON.stringify(pads) });

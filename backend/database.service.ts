@@ -9,11 +9,10 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     this.pool = mysql.createPool({
       host: process.env.DB_HOST || 'localhost',
       user: process.env.DB_USER || 'root',
-      password: process.env.DB_PASSWORD || '',
+      password: process.env.DB_PASSWORD || 'root',
       database: process.env.DB_NAME || 'stratflow',
       waitForConnections: true,
       connectionLimit: 10,
-      queueLimit: 0,
     });
 
     await this.initTables();
@@ -24,26 +23,17 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async initTables() {
-    const connection = await this.pool.getConnection();
+    const conn = await this.pool.getConnection();
     try {
-      await connection.query(`
-        CREATE TABLE IF NOT EXISTS enterprises (
-          name VARCHAR(255) PRIMARY KEY,
-          display_name VARCHAR(255),
-          password VARCHAR(255)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-      `);
-
-      await connection.query(`
-        CREATE TABLE IF NOT EXISTS workspaces (
-          ent_name VARCHAR(255) PRIMARY KEY,
-          data LONGTEXT,
-          updated_at BIGINT,
-          CONSTRAINT fk_enterprise FOREIGN KEY (ent_name) REFERENCES enterprises(name) ON DELETE CASCADE
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-      `);
+      await conn.query(`CREATE TABLE IF NOT EXISTS enterprises (name VARCHAR(255) PRIMARY KEY, display_name VARCHAR(255), password VARCHAR(255)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`);
+      await conn.query(`CREATE TABLE IF NOT EXISTS users (id VARCHAR(255) PRIMARY KEY, ent_name VARCHAR(255), username VARCHAR(255), password VARCHAR(255), name VARCHAR(255), role VARCHAR(50), department_id VARCHAR(255), CONSTRAINT fk_user_ent FOREIGN KEY (ent_name) REFERENCES enterprises(name) ON DELETE CASCADE) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`);
+      await conn.query(`CREATE TABLE IF NOT EXISTS processes (id VARCHAR(255) PRIMARY KEY, ent_name VARCHAR(255), name VARCHAR(255), category VARCHAR(255), level INT, version VARCHAR(50), is_active BOOLEAN, owner VARCHAR(255), co_owner VARCHAR(255), objective TEXT, nodes_json LONGTEXT, links_json LONGTEXT, history_json LONGTEXT, updated_at BIGINT, CONSTRAINT fk_proc_ent FOREIGN KEY (ent_name) REFERENCES enterprises(name) ON DELETE CASCADE) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`);
+      await conn.query(`CREATE TABLE IF NOT EXISTS departments (id VARCHAR(255) PRIMARY KEY, ent_name VARCHAR(255), name VARCHAR(255), manager VARCHAR(255), roles_json TEXT, parent_id VARCHAR(255), CONSTRAINT fk_dept_ent FOREIGN KEY (ent_name) REFERENCES enterprises(name) ON DELETE CASCADE) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`);
+      await conn.query(`CREATE TABLE IF NOT EXISTS strategies (ent_name VARCHAR(255) PRIMARY KEY, mission TEXT, vision TEXT, okrs_json LONGTEXT, CONSTRAINT fk_strat_ent FOREIGN KEY (ent_name) REFERENCES enterprises(name) ON DELETE CASCADE) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`);
+      await conn.query(`CREATE TABLE IF NOT EXISTS weekly_pads (id VARCHAR(255) PRIMARY KEY, ent_name VARCHAR(255), week_id VARCHAR(50), owner_id VARCHAR(255), type VARCHAR(50), entries_json LONGTEXT, CONSTRAINT fk_pad_ent FOREIGN KEY (ent_name) REFERENCES enterprises(name) ON DELETE CASCADE) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`);
+      console.log('NestJS Database Service: Schema Check Complete.');
     } finally {
-      connection.release();
+      conn.release();
     }
   }
 
