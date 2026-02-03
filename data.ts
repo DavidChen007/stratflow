@@ -1,3 +1,4 @@
+
 import { AppState, Enterprise, User, ProcessDefinition, Department, WeeklyPAD } from "./types";
 
 const API_BASE = "/api";
@@ -72,7 +73,6 @@ export const getWorkspace = async (entId: string): Promise<AppState> => {
     users: users || [],
     processes: processes || [],
     departments: buildDeptTree(flatDepts || []),
-    // Fix: Added missing properties customerIssues and employeeIssues to match CompanyStrategy interface
     strategy: strategy || { mission: '', vision: '', customerIssues: '', employeeIssues: '', companyOKRs: {} },
     weeklyPADs: pads || []
   };
