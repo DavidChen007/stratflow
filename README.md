@@ -10,11 +10,75 @@ View your app in AI Studio: https://ai.studio/apps/drive/180qk8YL08yQr24k9BGhW1X
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
+**Prerequisites:**  Node.js, Docker (可选，用于数据库)
 
+### 方式一：完整运行（前端 + 后端 + 数据库）
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+#### 1. 启动数据库（使用 Docker）
+```bash
+docker compose up -d db
+```
+
+数据库配置：
+- 端口：3306
+- 用户名：root
+- 密码：root
+- 数据库名：stratflow
+
+#### 2. 启动后端服务
+```bash
+cd backend
+npm install
+npm run start:dev
+```
+
+后端服务将运行在：http://localhost:3001/api
+
+#### 3. 启动前端服务
+```bash
+# 在项目根目录
+npm install
+npm run dev
+```
+
+前端服务将运行在：http://localhost:3000
+
+### 方式二：仅运行前端（不需要后端和数据库）
+
+1. 安装依赖：
+   ```bash
+   npm install
+   ```
+
+2. （可选）设置 `GEMINI_API_KEY` 在 [.env.local](.env.local) 文件中
+
+3. 运行前端：
+   ```bash
+   npm run dev
+   ```
+
+### 使用 Docker Compose 一键启动所有服务
+
+```bash
+docker compose up -d
+```
+
+这将启动：
+- MySQL 数据库（端口 3306）
+- NestJS 后端（通过 Docker 内部网络）
+- 前端（端口 80）
+
+### API 端点
+
+后端提供以下 API 端点：
+
+- **企业管理**: `/api/enterprises`
+- **工作区**: `/api/workspace/*`
+- **认证**: `/api/auth/login`
+- **用户管理**: `/api/users`
+
+### 当前运行状态
+
+✅ 前端开发服务器：http://localhost:3000
+✅ 后端开发服务器：http://localhost:3001/api
+⚠️ 数据库：需要启动 Docker 容器
