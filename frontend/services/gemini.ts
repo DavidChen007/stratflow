@@ -1,6 +1,13 @@
+
 import { GoogleGenAI } from "@google/genai";
 
-const getAiClient = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
+// 严格遵循规范：必须从 process.env.API_KEY 获取密钥
+const getAiClient = () => {
+  if (!process.env.API_KEY) {
+    console.warn("API_KEY environment variable is not defined.");
+  }
+  return new GoogleGenAI({ apiKey: process.env.API_KEY });
+};
 
 export const checkOKRQuality = async (objective: string, krs: string[]): Promise<string> => {
   const ai = getAiClient();

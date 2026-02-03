@@ -16,7 +16,8 @@
     "@nestjs/common": "^11.1.12",
     "@nestjs/core": "^11.1.12",
     "mysql2": "^3.16.2",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "@nestjs/swagger": "^11.2.5"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
