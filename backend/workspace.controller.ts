@@ -1,13 +1,15 @@
-
 import { Controller, Get, Post, Delete, Body, Param, HttpException, HttpStatus } from '@nestjs/common';
 import { DatabaseService } from './database.service';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
 
+@ApiTags('Workspace')
 @Controller('workspace')
 export class WorkspaceController {
   constructor(private readonly db: DatabaseService) {}
 
   // --- Processes ---
   @Get('processes/:entId')
+  @ApiOperation({ summary: '获取流程资产列表' })
   async getProcesses(@Param('entId') entId: string) {
     const [rows]: any = await this.db.query("SELECT * FROM processes WHERE ent_name = ?", [entId]);
     return rows.map((r: any) => ({
@@ -20,6 +22,7 @@ export class WorkspaceController {
   }
 
   @Post('processes/:entId')
+  @ApiOperation({ summary: '保存或更新流程资产' })
   async saveProcess(@Param('entId') entId: string, @Body() proc: any) {
     try {
       await this.db.query(`
@@ -52,6 +55,7 @@ export class WorkspaceController {
   }
 
   @Delete('processes/:entId/:procId')
+  @ApiOperation({ summary: '删除流程资产' })
   async deleteProcess(@Param('entId') entId: string, @Param('procId') procId: string) {
     await this.db.query("DELETE FROM processes WHERE ent_name = ? AND id = ?", [entId, procId]);
     return { success: true };
@@ -59,6 +63,7 @@ export class WorkspaceController {
 
   // --- Strategy ---
   @Get('strategy/:entId')
+  @ApiOperation({ summary: '获取企业战略与OKR' })
   async getStrategy(@Param('entId') entId: string) {
     const [rows]: any = await this.db.query("SELECT mission, vision, okrs_json FROM strategies WHERE ent_name = ?", [entId]);
     if (rows.length === 0) return { mission: '', vision: '', companyOKRs: {} };
@@ -70,6 +75,7 @@ export class WorkspaceController {
   }
 
   @Post('strategy/:entId')
+  @ApiOperation({ summary: '保存企业战略' })
   async saveStrategy(@Param('entId') entId: string, @Body() body: any) {
     await this.db.query(`
       INSERT INTO strategies (ent_name, mission, vision, okrs_json) 
@@ -79,8 +85,9 @@ export class WorkspaceController {
     return { success: true };
   }
 
-  // --- Departments (Accepts Flat List from Frontend) ---
+  // --- Departments ---
   @Get('departments/:entId')
+  @ApiOperation({ summary: '获取组织架构列表' })
   async getDepts(@Param('entId') entId: string) {
     const [rows]: any = await this.db.query("SELECT * FROM departments WHERE ent_name = ?", [entId]);
     return rows.map((r: any) => ({
@@ -93,8 +100,8 @@ export class WorkspaceController {
   }
 
   @Post('departments/:entId')
+  @ApiOperation({ summary: '同步组织架构' })
   async saveDepts(@Param('entId') entId: string, @Body() depts: any[]) {
-    const connection = await this.db.query("SELECT 1"); // Dummy to ensure connection works
     try {
       await this.db.query("DELETE FROM departments WHERE ent_name = ?", [entId]);
       for (const d of depts) {
@@ -110,6 +117,7 @@ export class WorkspaceController {
 
   // --- Weekly PADs ---
   @Get('pads/:entId')
+  @ApiOperation({ summary: '获取周度PAD治理记录' })
   async getPADs(@Param('entId') entId: string) {
     const [rows]: any = await this.db.query("SELECT * FROM weekly_pads WHERE ent_name = ?", [entId]);
     return rows.map((r: any) => ({
@@ -122,6 +130,7 @@ export class WorkspaceController {
   }
 
   @Post('pads/:entId')
+  @ApiOperation({ summary: '同步周度PAD记录' })
   async savePADs(@Param('entId') entId: string, @Body() pads: any[]) {
     try {
       await this.db.query("DELETE FROM weekly_pads WHERE ent_name = ?", [entId]);

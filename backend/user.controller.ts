@@ -1,11 +1,14 @@
 import { Controller, Get, Post, Delete, Body, Param, Query, HttpException, HttpStatus } from '@nestjs/common';
 import { DatabaseService } from './database.service';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
 
+@ApiTags('User')
 @Controller('users')
 export class UserController {
   constructor(private readonly db: DatabaseService) {}
 
   @Get()
+  @ApiOperation({ summary: '获取特定企业下的所有用户' })
   async findByEnterprise(@Query('entId') entId: string) {
     if (!entId) throw new HttpException('Missing entId', HttpStatus.BAD_REQUEST);
     const [rows]: any = await this.db.query("SELECT id, username, name, role, department_id FROM users WHERE ent_name = ?", [entId]);
@@ -13,6 +16,7 @@ export class UserController {
   }
 
   @Post()
+  @ApiOperation({ summary: '创建或更新用户信息' })
   async save(@Body() user: any) {
     const { id, ent_name, username, password, name, role, department_id } = user;
     try {
@@ -33,6 +37,7 @@ export class UserController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: '删除用户' })
   async remove(@Param('id') id: string) {
     await this.db.query("DELETE FROM users WHERE id = ?", [id]);
     return { success: true };
