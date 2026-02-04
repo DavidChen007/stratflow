@@ -1,6 +1,6 @@
 # 前端 Dockerfile - 多阶段构建
 # 阶段 1: 构建阶段
-FROM node:22-alpine AS builder
+FROM m.daocloud.io/docker.io/library/node:22-alpine AS builder
 
 WORKDIR /app
 
@@ -17,7 +17,7 @@ COPY . .
 RUN npm run build
 
 # 阶段 2: 生产阶段
-FROM nginx:alpine
+FROM m.daocloud.io/docker.io/library/nginx:alpine
 
 # 复制构建产物到 nginx
 COPY --from=builder /app/dist /usr/share/nginx/html
