@@ -1,7 +1,8 @@
 
 import { AppState, Enterprise, User, ProcessDefinition, Department, WeeklyPAD } from "./types";
 
-const API_BASE = "/api";
+// API 基础路径 - 对应后端的全局前缀 /api/flow
+const API_BASE = "/api/flow";
 
 const api = async <T>(endpoint: string, options?: RequestInit): Promise<T> => {
   const response = await fetch(`${API_BASE}${endpoint}`, {
