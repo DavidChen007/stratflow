@@ -1,5 +1,5 @@
 # 后端 Dockerfile - NestJS
-FROM node:22-alpine
+FROM m.daocloud.io/docker.io/library/node:22-alpine
 
 WORKDIR /app
 
