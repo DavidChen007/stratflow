@@ -38,7 +38,7 @@ services:
   # 3. Frontend Entry
   frontend:
     build:
-      context: ./frontend
+      context: .
       dockerfile: Dockerfile
     container_name: stratflow-frontend
     restart: always

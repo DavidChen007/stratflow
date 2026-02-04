@@ -68,6 +68,42 @@ docker compose up -d
 - NestJS 后端（通过 Docker 内部网络）
 - 前端（端口 80）
 
+访问应用：http://localhost
+
+### 使用 Docker 单独构建和运行
+
+#### 构建前端镜像
+```bash
+docker build -t stratflow-frontend .
+docker run -p 80:80 stratflow-frontend
+```
+
+#### 构建后端镜像
+```bash
+cd backend
+docker build -t stratflow-backend .
+docker run -p 3001:3001 \
+  -e DB_HOST=192.168.0.80 \
+  -e DB_USER=root \
+  -e DB_PASSWORD=feixun@123ERP \
+  -e DB_NAME=stratflow \
+  stratflow-backend
+```
+
+### Docker 镜像说明
+
+**前端镜像**：
+- 基于 Node.js 22 Alpine 构建
+- 使用多阶段构建优化镜像大小
+- 最终使用 Nginx Alpine 提供静态文件服务
+- 包含 API 代理配置
+
+**后端镜像**：
+- 基于 Node.js 22 Alpine
+- 编译 TypeScript 代码
+- 生产环境优化（删除开发依赖）
+- 支持环境变量配置数据库连接
+
 ### API 端点
 
 后端提供以下 API 端点：
